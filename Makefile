@@ -54,6 +54,7 @@ CADICAL_BUILD := $(SOLVERS_DIR)/cadical/build
 KISSATMAB_BUILD := $(SOLVERS_DIR)/kissat_mab/build
 KISSATINC_BUILD := $(SOLVERS_DIR)/kissat-inc/build
 KISSATGASPI_BUILD := $(SOLVERS_DIR)/solvers/GASPIKISSAT/build
+KISSATMABHYPRE_BUILD := $(SOLVERS_DIR)/solvers/kissat_mab_hypre/build
 
 M4RI_DIR := $(LIBS_DIR)/m4ri-20200125
 
@@ -69,7 +70,8 @@ DEPENDENCIES := $(MINISAT_BUILD)/libminisat.a \
 				$(TASSAT_BUILD)/libtas.a \
                 $(CADICAL_BUILD)/libcadical.a \
                 $(MAPLE_BUILD)/libmapleCOMSPS.a \
-                $(M4RI_DIR)/.libs/libm4ri.a
+                $(M4RI_DIR)/.libs/libm4ri.a \
+				$(KISSATMABHYPRE_BUILD)/libkissat.a
 
 # Library flags
 # =============
@@ -84,6 +86,7 @@ LIBS := -l:liblgl.a -L$(LINGELING_BUILD) \
 		-l:libkissat_mab.a -L$(KISSATMAB_BUILD) \
 		-l:libkissat_inc.a -L$(KISSATINC_BUILD) \
 		-l:libm4ri.a -L./libs/m4ri-20200125/.libs \
+		-l:libkissat.a -L$(KISSATMABHYPRE_BUILD) \
 		-lpthread -lz -lm $(shell mpic++ --showme:link)
 # -l:libgkissat.a -L$(KISSATGASPI_BUILD) \
 
@@ -146,9 +149,9 @@ $(RELEASE_BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 # Simplified library targets
 # ==========================
-.PHONY: minisat glucose lingeling kissat kissat_mab kissat_inc kissat_gaspi yalsat cadical maple m4ri tassat
+.PHONY: minisat glucose lingeling kissat kissat_mab kissat_inc kissat_gaspi yalsat cadical maple m4ri tassat kissat_mab_hypre
 
-solvers: minisat glucose lingeling kissat kissat_mab kissat_inc kissat_gaspi yalsat cadical maple tassat
+solvers: minisat glucose lingeling kissat kissat_mab kissat_inc kissat_gaspi yalsat cadical maple tassat kissat_mab_hypre
 
 libs: m4ri
 
@@ -164,6 +167,7 @@ tassat: $(TASSAT_BUILD)/libtas.a
 cadical: $(CADICAL_BUILD)/libcadical.a
 maple: $(MAPLE_BUILD)/libmapleCOMSPS.a
 m4ri: $(M4RI_DIR)/.libs/libm4ri.a
+kissat_mab_hypre: $(KISSATMABHYPRE_BUILD)/libkissat.a
 
 # Library targets
 # ===============
@@ -212,6 +216,11 @@ $(M4RI_DIR)/.libs/libm4ri.a:
 	cd $(M4RI_DIR) && autoreconf --install && ./configure --enable-thread-safe
 	$(MAKE) -C $(M4RI_DIR)
 
+$(KISSATMABHYPRE_BUILD)/libkissat.a:
+# 	cd $(SOLVERS_DIR)/kissat_mab_hypre && bash ./configure --no-proofs
+	cd $(SOLVERS_DIR)/kissat_mab_hypre && bash ./configure
+	$(MAKE) -C $(SOLVERS_DIR)/kissat_mab_hypre
+
 # Clean targets
 # =============
 .PHONY: clean cleanpainless cleansolvers clean cleanall
@@ -231,6 +240,7 @@ cleansolvers:
 	$(MAKE) clean -C $(SOLVERS_DIR)/yalsat
 	$(MAKE) clean -C $(SOLVERS_DIR)/tassat
 	$(MAKE) -C $(SOLVERS_DIR)/lingeling clean
+	$(MAKE) clean -C $(SOLVERS_DIR)/kissat_mab_hypre
 
 clean: cleanpainless cleansolvers
 

@@ -123,6 +123,8 @@ solvers/kissat-inc/makefile
 solvers/kissat-inc/src/makefile
 solvers/kissat-inc/build
 
+solvers/kissat_mab_hypre/build
+
 *.csv
 
 build/

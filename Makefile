@@ -53,6 +53,7 @@ KISSAT_BUILD := $(SOLVERS_DIR)/kissat/build
 CADICAL_BUILD := $(SOLVERS_DIR)/cadical/build
 KISSATMAB_BUILD := $(SOLVERS_DIR)/kissat_mab/build
 KISSATINC_BUILD := $(SOLVERS_DIR)/kissat-inc/build
+KISSATMABHYPRE_BUILD := $(SOLVERS_DIR)/kissat_mab_hypre/build
 KISSATGASPI_BUILD := $(SOLVERS_DIR)/solvers/GASPIKISSAT/build
 
 M4RI_DIR := $(LIBS_DIR)/m4ri-20200125
@@ -69,7 +70,8 @@ DEPENDENCIES := $(MINISAT_BUILD)/libminisat.a \
 				$(TASSAT_BUILD)/libtas.a \
                 $(CADICAL_BUILD)/libcadical.a \
                 $(MAPLE_BUILD)/libmapleCOMSPS.a \
-                $(M4RI_DIR)/.libs/libm4ri.a
+                $(M4RI_DIR)/.libs/libm4ri.a \
+				$(KISSATMABHYPRE_BUILD)/libkissat_mab_hypre.a
 
 # Library flags
 # =============
@@ -83,6 +85,7 @@ LIBS := -l:liblgl.a -L$(LINGELING_BUILD) \
 		-l:libmapleCOMSPS.a -L$(MAPLE_BUILD) \
 		-l:libkissat_mab.a -L$(KISSATMAB_BUILD) \
 		-l:libkissat_inc.a -L$(KISSATINC_BUILD) \
+		-l:libkissat_mab_hypre.a -L$(KISSATMABHYPRE_BUILD) \
 		-l:libm4ri.a -L./libs/m4ri-20200125/.libs \
 		-lpthread -lz -lm $(shell mpic++ --showme:link)
 # -l:libgkissat.a -L$(KISSATGASPI_BUILD) \
@@ -146,9 +149,9 @@ $(RELEASE_BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 # Simplified library targets
 # ==========================
-.PHONY: minisat glucose lingeling kissat kissat_mab kissat_inc kissat_gaspi yalsat cadical maple m4ri tassat
+.PHONY: minisat glucose lingeling kissat kissat_mab kissat_inc kissat_gaspi yalsat cadical maple m4ri tassat kissat_mab_hypre
 
-solvers: minisat glucose lingeling kissat kissat_mab kissat_inc kissat_gaspi yalsat cadical maple tassat
+solvers: minisat glucose lingeling kissat kissat_mab kissat_inc kissat_gaspi yalsat cadical maple tassat kissat_mab_hypre
 
 libs: m4ri
 
@@ -164,6 +167,7 @@ tassat: $(TASSAT_BUILD)/libtas.a
 cadical: $(CADICAL_BUILD)/libcadical.a
 maple: $(MAPLE_BUILD)/libmapleCOMSPS.a
 m4ri: $(M4RI_DIR)/.libs/libm4ri.a
+kissat_mab_hypre: $(KISSATMABHYPRE_BUILD)/libkissat_mab_hypre.a
 
 # Library targets
 # ===============
@@ -208,6 +212,10 @@ $(CADICAL_BUILD)/libcadical.a:
 $(MAPLE_BUILD)/libmapleCOMSPS.a:
 	$(MAKE) -C $(SOLVERS_DIR)/mapleCOMSPS r
 
+$(KISSATMABHYPRE_BUILD)/libkissat_mab_hypre.a:
+	cd $(SOLVERS_DIR)/kissat_mab_hypre && bash ./configure --no-proofs
+	$(MAKE) -C $(SOLVERS_DIR)/kissat_mab_hypre
+
 $(M4RI_DIR)/.libs/libm4ri.a:
 	cd $(M4RI_DIR) && autoreconf --install && ./configure --enable-thread-safe
 	$(MAKE) -C $(M4RI_DIR)
@@ -230,6 +238,7 @@ cleansolvers:
 	$(MAKE) clean -C $(SOLVERS_DIR)/glucose
 	$(MAKE) clean -C $(SOLVERS_DIR)/yalsat
 	$(MAKE) clean -C $(SOLVERS_DIR)/tassat
+	$(MAKE) clean -C $(SOLVERS_DIR)/kissat_mab_hypre
 	$(MAKE) -C $(SOLVERS_DIR)/lingeling clean
 
 clean: cleanpainless cleansolvers

@@ -1,1 +1,1 @@
-/mnt/d/wsl-code/kissat_satcomp26/makefile
+/mnt/d/wsl-code/my-painless/painless/solvers/kissat_mab_hypre/makefile

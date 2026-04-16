@@ -1,0 +1,96 @@
+[workspace]
+members = [
+    "veripb-formula",
+    "veripb-parser",
+    "veripb-propagator",
+]
+resolver = "3"
+
+
+[workspace.package]
+authors = ["Andy Oertel <andy.oertel@cs.lth.se>"]
+edition = "2021"
+license = "MIT OR Apache-2.0"
+rust-version = "1.84.0"
+repository = "https://gitlab.com/MIAOresearch/software/VeriPB"
+
+
+[package]
+name = "veripb"
+version = "3.0.2"
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+readme = "README.md"
+description = "VeriPB is a proof checker for verifying pseudo-Boolean certificates of satisfiability, unsatisfiability, and optimality bounds."
+keywords = ["pseudo-Boolean", "checker", "certification", "satisfiability", "optimization"]
+categories = ["command-line-utilities", "science"]
+exclude = [
+    "tests/instances"
+]
+
+
+
+[dependencies]
+ahash = "0.8.11"
+anyhow = "1.0.95"
+by_address = "1.2.1"
+clap = { version = "4.5.32", features = ["derive"] }
+colored = "3.0.0"
+fragile = "2.0.0"
+git-version = "0.3.9"
+itertools = "0.14.0"
+logos = "0.15.0"
+malachite-base = "0.5.0"
+malachite-bigint = "0.5.0"
+malachite-nz = "0.5.0"
+memmap2 = "0.9.5"
+mimalloc = "0.1.45"
+num-traits = "0.2.19"
+thiserror = "2.0.12"
+
+[dependencies.veripb-formula]
+version = "0.1.2"
+path = "veripb-formula"
+
+[dependencies.veripb-parser]
+version = "0.1.2"
+path = "veripb-parser"
+
+[dependencies.veripb-propagator]
+version = "0.1.2"
+path = "veripb-propagator"
+
+
+[dev-dependencies]
+glob = "0.3.3"
+libtest-mimic = "0.8.1"
+tempfile = "3.23.0"
+
+
+[lib]
+name = "veripb"
+path = "src/lib.rs"
+
+
+[[bin]]
+name = "veripb"
+path = "src/bin/main.rs"
+
+
+[[test]]
+name = "integration"
+path = "tests/integration.rs"
+harness = false
+
+
+[profile.release]
+lto = true
+panic = "abort"
+# Comment out the following line for profiling to enable debug symbols.
+# debug = true
+
+[profile.bench]
+debug = true

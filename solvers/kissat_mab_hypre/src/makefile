@@ -1,0 +1,1 @@
+/mnt/d/wsl-code/kissat_satcomp26/makefile

@@ -49,6 +49,7 @@ MINISAT_BUILD := $(SOLVERS_DIR)/minisat/build/release/lib
 LINGELING_BUILD := $(SOLVERS_DIR)/lingeling
 YALSAT_BUILD := $(SOLVERS_DIR)/yalsat
 TASSAT_BUILD := $(SOLVERS_DIR)/tassat
+PASSAT_BUILD := $(SOLVERS_DIR)/passat
 KISSAT_BUILD := $(SOLVERS_DIR)/kissat/build
 CADICAL_BUILD := $(SOLVERS_DIR)/cadical/build
 KISSATMAB_BUILD := $(SOLVERS_DIR)/kissat_mab/build
@@ -68,6 +69,7 @@ DEPENDENCIES := $(MINISAT_BUILD)/libminisat.a \
 				$(KISSATINC_BUILD)/libkissat_inc.a \
                 $(YALSAT_BUILD)/libyals.a \
 				$(TASSAT_BUILD)/libtas.a \
+				$(PASSAT_BUILD)/libpassat.a \
                 $(CADICAL_BUILD)/libcadical.a \
                 $(MAPLE_BUILD)/libmapleCOMSPS.a \
                 $(M4RI_DIR)/.libs/libm4ri.a \
@@ -78,6 +80,7 @@ DEPENDENCIES := $(MINISAT_BUILD)/libminisat.a \
 LIBS := -l:liblgl.a -L$(LINGELING_BUILD) \
 		-l:libyals.a -L$(YALSAT_BUILD) \
 		-l:libtas.a -L$(TASSAT_BUILD) \
+		-l:libpassat.a -L$(PASSAT_BUILD) \
 		-l:libkissat.a -L$(KISSAT_BUILD) \
 		-l:libminisat.a -L$(MINISAT_BUILD) \
 		-l:libglucose.a -L$(GLUCOSE_BUILD) \
@@ -149,9 +152,9 @@ $(RELEASE_BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
 
 # Simplified library targets
 # ==========================
-.PHONY: minisat glucose lingeling kissat kissat_mab kissat_inc kissat_gaspi yalsat cadical maple m4ri tassat kissat_mab_hypre
+.PHONY: minisat glucose lingeling kissat kissat_mab kissat_inc kissat_gaspi yalsat cadical maple m4ri tassat kissat_mab_hypre passat
 
-solvers: minisat glucose lingeling kissat kissat_mab kissat_inc kissat_gaspi yalsat cadical maple tassat kissat_mab_hypre
+solvers: minisat glucose lingeling kissat kissat_mab kissat_inc kissat_gaspi yalsat cadical maple tassat kissat_mab_hypre passat
 
 libs: m4ri
 
@@ -164,6 +167,7 @@ kissat_inc: $(KISSATINC_BUILD)/libkissat_inc.a
 # kissat_gaspi: $(KISSATGASPI_BUILD)/libgkissat.a
 yalsat: $(YALSAT_BUILD)/libyals.a
 tassat: $(TASSAT_BUILD)/libtas.a
+passat: $(PASSAT_BUILD)/libpassat.a
 cadical: $(CADICAL_BUILD)/libcadical.a
 maple: $(MAPLE_BUILD)/libmapleCOMSPS.a
 m4ri: $(M4RI_DIR)/.libs/libm4ri.a
@@ -205,6 +209,10 @@ $(TASSAT_BUILD)/libtas.a:
 	cd $(SOLVERS_DIR)/tassat && bash ./configure.sh
 	$(MAKE) -C $(SOLVERS_DIR)/tassat
 
+$(PASSAT_BUILD)/libpassat.a:
+	cd $(SOLVERS_DIR)/passat
+	$(MAKE) libpassat.a
+
 $(CADICAL_BUILD)/libcadical.a:
 	cd $(SOLVERS_DIR)/cadical && bash ./configure
 	$(MAKE) -C $(SOLVERS_DIR)/cadical
@@ -238,6 +246,7 @@ cleansolvers:
 	$(MAKE) clean -C $(SOLVERS_DIR)/glucose
 	$(MAKE) clean -C $(SOLVERS_DIR)/yalsat
 	$(MAKE) clean -C $(SOLVERS_DIR)/tassat
+	$(MAKE) clean -C $(SOLVERS_DIR)/passat
 	$(MAKE) clean -C $(SOLVERS_DIR)/kissat_mab_hypre
 	$(MAKE) -C $(SOLVERS_DIR)/lingeling clean
 

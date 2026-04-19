@@ -195,11 +195,33 @@ SolverFactory::createSolvers(int maxSolvers,
 							 std::vector<std::shared_ptr<SolverCdclInterface>>& cdclSolvers,
 							 std::vector<std::shared_ptr<LocalSearchInterface>>& localSolvers)
 {
-	unsigned int typeCount = portfolio.size();
-	LOGDEBUG1("Portfolio is '%s', of size %u", portfolio.c_str(), typeCount);
-	for (size_t i = 0; i < maxSolvers && typeCount > 0; i++) {
-		createSolver(portfolio.at(i % typeCount), importDBType, cdclSolvers, localSolvers);
+	std::string cdclPortfolio = "";
+	std::string lcPortfolio = "";
+	for (auto c : portfolio) {
+		if (c == 'y' || c == 't' || c == 'p') {
+			lcPortfolio += c;
+		} else {
+			cdclPortfolio += c;
+		}
 	}
+	if (lcPortfolio.size() > 0) {
+		std::cout << "detected local search solvers " << lcPortfolio << std::endl;
+	}
+	unsigned int lcTypeCount = lcPortfolio.size();
+	for (size_t i = 0; i < lcTypeCount; ++i) {
+		createSolver(lcPortfolio.at(i), importDBType, cdclSolvers, localSolvers);
+	}
+	maxSolvers = maxSolvers - lcTypeCount;
+	unsigned int cdclTypeCount = cdclPortfolio.size();
+	for (size_t i = 0; i < maxSolvers && cdclTypeCount > 0; i++) {
+		createSolver(portfolio.at(i % cdclTypeCount), importDBType, cdclSolvers, localSolvers);
+	}
+
+	// unsigned int typeCount = portfolio.size();
+	// LOGDEBUG1("Portfolio is '%s', of size %u", portfolio.c_str(), typeCount);
+	// for (size_t i = 0; i < maxSolvers && typeCount > 0; i++) {
+	// 	createSolver(portfolio.at(i % typeCount), importDBType, cdclSolvers, localSolvers);
+	// }
 }
 
 void

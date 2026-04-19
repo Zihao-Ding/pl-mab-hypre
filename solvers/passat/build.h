@@ -189,6 +189,100 @@ int CCA_Solver::build_instance(char *filename)
     return 1;
 }
 
+int CCA_Solver::build_instance(const std::vector<std::vector<int>>& clauses, unsigned int nbVars)
+{
+    num_vars = (int)nbVars;
+    num_clauses = (int)clauses.size();
+    allocate_memory();
+    for (int c = 0; c < num_clauses; ++c)
+    {
+        clause_lit_count[c] = 0;
+        clause_delete[c] = 0;
+    }
+    for (int v = 1; v <= num_vars; ++v)
+    {
+        var_lit_count[v] = 0;
+        fix[v] = 0;
+    }
+
+    max_clause_len = 0;
+    min_clause_len = num_vars;
+
+    for (int c = 0; c < num_clauses; ++c) {
+        std::vector<int> cur_clause = clauses[c];
+        for (auto cur_lit : cur_clause) {
+            temp_lit[clause_lit_count[c]] = cur_lit;
+            clause_lit_count[c]++;
+        }
+        clause_lit[c] = new lit[clause_lit_count[c] + 1];
+        int i;
+        for (i = 0; i < clause_lit_count[c]; ++i)
+        {
+            clause_lit[c][i].clause_num = c;
+            clause_lit[c][i].var_num = abs(temp_lit[i]);
+            if (temp_lit[i] > 0)
+                clause_lit[c][i].sense = 1;
+            else
+                clause_lit[c][i].sense = 0;
+
+            var_lit_count[clause_lit[c][i].var_num]++;
+        }
+        clause_lit[c][i].var_num = 0;
+        clause_lit[c][i].clause_num = -1;
+
+        // unit clause
+        if (clause_lit_count[c] == 1)
+        {
+            unitclause_queue[unitclause_queue_end_pointer++] = clause_lit[c][0];
+            clause_delete[c] = 1;
+        }
+
+        if (clause_lit_count[c] > max_clause_len)
+            max_clause_len = clause_lit_count[c];
+        else if (clause_lit_count[c] < min_clause_len)
+            min_clause_len = clause_lit_count[c];
+
+        formula_len += clause_lit_count[c];
+    }
+
+    avg_clause_len = (double)formula_len / num_clauses;
+
+    if (unitclause_queue_end_pointer > 0)
+    {
+        simplify = 1;
+        for (int c = 0; c < num_clauses; c++)
+        {
+            org_clause_lit_count[c] = clause_lit_count[c];
+            org_clause_lit[c] = new lit[clause_lit_count[c] + 1];
+            for (int i = 0; i < org_clause_lit_count[c]; ++i)
+            {
+                org_clause_lit[c][i] = clause_lit[c][i];
+            }
+        }
+    }
+
+    // creat var literal arrays
+    for (int v = 1; v <= num_vars; ++v)
+    {
+        var_lit[v] = new lit[var_lit_count[v] + 1];
+        var_lit_count[v] = 0; // reset to 0, for build up the array
+    }
+    // scan all clauses to build up var literal arrays
+    for (int c = 0; c < num_clauses; ++c)
+    {
+        for (int i = 0; i < clause_lit_count[c]; ++i)
+        {
+            int v = clause_lit[c][i].var_num;
+            var_lit[v][var_lit_count[v]] = clause_lit[c][i];
+            ++var_lit_count[v];
+        }
+    }
+    for (int v = 1; v <= num_vars; ++v) // set boundary
+        var_lit[v][var_lit_count[v]].clause_num = -1;
+
+    return 1;
+}
+
 void CCA_Solver::allocate_memory()
 {
     int malloc_var_length = num_vars + 10;

@@ -17,7 +17,7 @@ enum type
 	SAT5,
 	SAT7,
 	strSAT
-} probtype;
+};
 
 /* limits on the size of the problem. */
 #define MAX_VARS 4000010
@@ -174,6 +174,7 @@ private:
 public:
 	CCA_Solver();
 	int build_instance(char *filename);
+	int build_instance(const std::vector<std::vector<int>>& clauses, unsigned int nbVars);
 	int build_neighbor_relation();
 	void settings();
 	bool local_search(char *filename);

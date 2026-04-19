@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include <random>
+#include <atomic>
 
 class SATSolver
 {
@@ -41,6 +42,8 @@ private:
     std::vector<int> neighbor_of_hot;
     // int *unsat_cnt;
 
+    std::atomic<bool> terminate_solver{false};
+
 private:
     int unitPropagation();
     bool isSatisfied();
@@ -63,4 +66,9 @@ public:
 
     void free_memory();
     bool solve();
+
+    SATSolver();
+    void set_terminate_solver_cmd(bool val);
+    void add_initial_clauses(const std::vector<std::vector<int>>& clauses, unsigned int nbVars);
+    int preprocess();
 };

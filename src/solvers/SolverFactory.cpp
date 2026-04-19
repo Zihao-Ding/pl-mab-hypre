@@ -17,6 +17,7 @@
 #include "solvers/CDCL/KissatMABHyPreSolver.hpp"
 #include "solvers/LocalSearch/YalSat.hpp"
 #include "solvers/LocalSearch/TaSSAT.hpp"
+#include "solvers/LocalSearch/PASSAT.hpp"
 
 #include "containers/ClauseDatabases/ClauseDatabaseFactory.hpp"
 
@@ -142,6 +143,13 @@ SolverFactory::createSolver(char type, char importDBType, std::shared_ptr<Solver
 #ifdef TASSAT_
 		case 't':
 			createdSolver = std::make_shared<TaSSAT>(id, __globalParameters__.localSearchFlips, __globalParameters__.maxDivNoise);
+			return SolverAlgorithmType::LOCAL_SEARCH;
+			// break;
+#endif
+
+#ifdef PASSAT_
+		case 'p':
+			createdSolver = std::make_shared<passat::PASSAT>(id, __globalParameters__.localSearchFlips, __globalParameters__.maxDivNoise);
 			return SolverAlgorithmType::LOCAL_SEARCH;
 			// break;
 #endif

@@ -535,35 +535,110 @@ bool SATSolver::solve()
         double elapse_time = get_runtime();
         if (elapse_time >= 1200)
             break;
+        if (terminate_solver)
+            break;
     }
     return false;
 }
 
-int main(int argc, char *argv[])
+SATSolver::SATSolver()
 {
-    int seed = 1, i;
-    SATSolver sat_solver(argv[1]);
+    solver = CCA_Solver();
+}
 
-    start_timing();
-    if (sat_solver.build_instance(argv[1]) != 0)
+void SATSolver::set_terminate_solver_cmd(bool val)
+{
+    terminate_solver = val;
+}
+
+void SATSolver::add_initial_clauses(const std::vector<std::vector<int>>& clauses, unsigned int nbVars)
+{
+    solver.build_instance(clauses, nbVars);
+}
+
+int SATSolver::preprocess()
+{
+    bool satisfible = solver.preprocess();
+    
+    if (!satisfible)
     {
-        cout << "Invalid filename: " << argv[1] << endl;
+        cout << "s UNSATISFIABLE" << endl;
+        FILE *rf = fopen("result-sat.txt", "a+");
+        // fprintf(rf, "my\t%s\t-2\n", filename);
+        fclose(rf);
+        solver.free_memory();
         return -1;
     }
-
-    srand(seed);
-    bool res = sat_solver.solve();
-    FILE *rf = fopen("result-sat.txt", "a+");
-    if (res)
+    solver.init_active_state();
+    int res = solver.build_neighbor_relation();
+    if (res == 1)
     {
-        double elapse_time = get_runtime();
-
-        fprintf(rf, "my\t%s\t1\t%0.3f\n", argv[1], elapse_time);
+        cout << "s UNKNOWN" << endl;
+        FILE *rf = fopen("result-sat.txt", "a+");
+        // fprintf(rf, "my\t%s\t-1\n", filename);
+        fclose(rf);
+        solver.free_memory();
+        return -1;
     }
-    else
+    num_vars = solver.get_var_num();
+    num_remain_vars = num_vars;
+    num_clauses = solver.get_clause_num();
+    var_lit = solver.get_var_lit();
+    var_lit_count = solver.get_var_lit_count();
+    clause_lit = solver.get_clause_lit();
+    clause_lit_count = solver.get_clause_lit_count();
+    clause_delete = solver.get_deleted_clause();
+    local_solution = solver.get_initial_solution();
+    var_neighbor = solver.get_var_neighbor();
+    var_neighbor_count = solver.get_var_neighbor_count();
+    flip_cnt = solver.get_flip_cnt();
+    alloc_memory();
+    
+    for (int i = 1; i <= num_vars; i++)
     {
-        fprintf(rf, "my\t%s\t-1\n", argv[1]);
+        scores[i * 2] = 0.0;
+        scores[i * 2 + 1] = 0.0;
+        score_var[i] = 0.0;
+        in_conflict[i] = false;
+        for (int j = 0; j < var_lit_count[i]; j++)
+        {
+            int c = var_lit[i][j].clause_num;
+            if (clause_delete[c] != 1)
+            {
+                scores[i * 2 + var_lit[i][j].sense] += 1.0 / clause_lit_count[c];
+                score_var[i] += 1.0 / clause_lit_count[c];
+            }
+        }
     }
-
-    sat_solver.free_memory();
+    getVariablesByScore();
+    return 0;
 }
+
+// int main(int argc, char *argv[])
+// {
+//     int seed = 1, i;
+//     SATSolver sat_solver(argv[1]);
+
+//     start_timing();
+//     if (sat_solver.build_instance(argv[1]) != 0)
+//     {
+//         cout << "Invalid filename: " << argv[1] << endl;
+//         return -1;
+//     }
+
+//     srand(seed);
+//     bool res = sat_solver.solve();
+//     FILE *rf = fopen("result-sat.txt", "a+");
+//     if (res)
+//     {
+//         double elapse_time = get_runtime();
+
+//         fprintf(rf, "my\t%s\t1\t%0.3f\n", argv[1], elapse_time);
+//     }
+//     else
+//     {
+//         fprintf(rf, "my\t%s\t-1\n", argv[1]);
+//     }
+
+//     sat_solver.free_memory();
+// }

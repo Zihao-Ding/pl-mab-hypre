@@ -211,7 +211,7 @@ $(TASSAT_BUILD)/libtas.a:
 
 $(PASSAT_BUILD)/libpassat.a:
 	cd $(SOLVERS_DIR)/passat
-	$(MAKE) libpassat.a
+	$(MAKE) libpassat.a -C $(SOLVERS_DIR)/passat
 
 $(CADICAL_BUILD)/libcadical.a:
 	cd $(SOLVERS_DIR)/cadical && bash ./configure

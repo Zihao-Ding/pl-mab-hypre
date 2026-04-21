@@ -40,6 +40,7 @@ LIBS_DIR := libs
 BUILD_DIR := build
 DEBUG_BUILD_DIR := $(BUILD_DIR)/debug
 RELEASE_BUILD_DIR := $(BUILD_DIR)/release
+SATSUMA_BUILD_DIR := $(BUILD_DIR)/satsuma
 
 # Solver and library directories
 # ==============================
@@ -120,11 +121,11 @@ all:
 # ==============
 .PHONY: painless debug release
 
-painless: debug release
+painless: debug release satsuma
 
 # Create build directories
 # ========================
-$(shell mkdir -p $(DEBUG_BUILD_DIR) $(RELEASE_BUILD_DIR))
+$(shell mkdir -p $(DEBUG_BUILD_DIR) $(RELEASE_BUILD_DIR) $(SATSUMA_BUILD_DIR))
 
 # Main targets
 # ============
@@ -133,6 +134,15 @@ debug: $(DEBUG_BUILD_DIR)/$(DEBUG_OUTPUT)
 
 release: $(RELEASE_BUILD_DIR)/$(RELEASE_OUTPUT)
 	ln -sf $(RELEASE_BUILD_DIR)/$(RELEASE_OUTPUT) painless
+
+satsuma:
+	@if [ ! -d "$(SATSUMA_BUILD_DIR)/CMakeFiles" ]; then \
+			echo "Configuring Satsuma with CMake..."; \
+			cd $(SATSUMA_BUILD_DIR) && cmake ../../solvers/kissat_mab_hypre/satsuma; \
+	fi
+	@echo "Building Satsuma..."
+	cd $(SATSUMA_BUILD_DIR) && make satsuma
+	@echo "Satsuma build complete: $(SATSUMA_BUILD_DIR)/satsuma"
 
 $(DEBUG_BUILD_DIR)/$(DEBUG_OUTPUT): $(DEBUG_OBJS) $(DEPENDENCIES)
 	$(CXX) -o $@ $(DEBUG_OBJS) $(DEBUG_FLAGS) $(INCLUDES) $(LIBS)
@@ -230,7 +240,7 @@ $(M4RI_DIR)/.libs/libm4ri.a:
 
 # Clean targets
 # =============
-.PHONY: clean cleanpainless cleansolvers clean cleanall
+.PHONY: clean cleanpainless cleansolvers satsuma_clean clean cleanall
 cleanpainless:
 	rm -rf $(BUILD_DIR)
 	rm -rf painless painlessd
@@ -250,7 +260,10 @@ cleansolvers:
 	$(MAKE) clean -C $(SOLVERS_DIR)/kissat_mab_hypre
 	$(MAKE) -C $(SOLVERS_DIR)/lingeling clean
 
-clean: cleanpainless cleansolvers
+satsuma_clean:
+	rm -rf $(SATSUMA_BUILD_DIR)
+
+clean: cleanpainless cleansolvers satsuma_clean
 
 cleanall: clean
 	$(MAKE) -C $(M4RI_DIR) clean

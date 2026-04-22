@@ -1,1 +1,0 @@
-/mnt/d/wsl-code/my-painless/painless/solvers/kissat_mab_hypre/makefile

@@ -24,6 +24,10 @@
 
 #include <inttypes.h>
 
+// Begin Painless
+#include "learn.h"
+// End Painless
+
 static void init_tiers (kissat *solver) {
   for (unsigned stable = 0; stable != 2; stable++) {
     if (!solver->tier1[stable]) {
@@ -192,6 +196,14 @@ int kissat_search (kissat *solver) {
   if (!res && searching (solver)) {
     start_search (solver);
     while (!res) {
+      // Begin Painless
+      if (0 == solver->level) {
+        if (false == kissat_import_unit_from_painless (solver))
+          return 20;
+        if (false == kissat_import_from_painless (solver))
+          return 20;
+      }
+      // End Painless
       clause *conflict = kissat_search_propagate (solver);
       if (conflict)
         res = kissat_analyze (solver, conflict);

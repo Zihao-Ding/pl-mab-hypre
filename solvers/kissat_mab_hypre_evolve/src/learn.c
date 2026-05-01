@@ -187,6 +187,43 @@ static void eagerly_subsume_last_learned (kissat *solver) {
     flush_last_learned (solver);
 }
 
+// Begin Painless
+static inline void kissat_export_to_painless (kissat *solver, unsigned glue,
+                                              unsigned size) {
+  solver->nb_exported++;
+
+  if (NULL == solver->cbkExportClause) {
+    LOGP ("The function pointer export_clause_to_painless is NULL in "
+          "solver %d!",
+          solver->id_painless);
+    return;
+  }
+
+  CLEAR_STACK (solver->pclause);
+
+  unsigned internal_lit;
+  int external_lit;
+
+  // Convert to external literals and copy them
+  for (unsigned i = 0; i < size; i++) {
+    internal_lit = PEEK_STACK (solver->clause, i);
+    /* External var */
+    external_lit = PEEK_STACK (
+        solver->export,
+        IDX (internal_lit)); /* IDX(internal_lit) = internal_var */
+    external_lit = (NEGATED (internal_lit)) ? -external_lit : external_lit;
+    PUSH_STACK (solver->pclause, external_lit);
+  }
+  assert (SIZE_STACK (solver->clause) == SIZE_STACK (solver->pclause));
+
+  // Copy lbd
+  solver->pglue = glue;
+
+  if (!solver->cbkExportClause (solver->painless, solver))
+    solver->nb_exported_filtered++;
+}
+// End Painless
+
 void kissat_learn_clause (kissat *solver) {
   const unsigned not_uip = PEEK_STACK (solver->clause, 0);
   const unsigned size = SIZE_STACK (solver->clause);
@@ -207,4 +244,107 @@ void kissat_learn_clause (kissat *solver) {
     if (ref != INVALID_REF)
       insert_last_learned (solver, ref);
   }
+
+  // Begin Painless
+  kissat_export_to_painless (solver, glue, size);
+  // End Painless
 }
+
+/**
+ * The callback does everything, it checks:
+ *  - If literal is eliminated
+ *  - If literal was already assigned, and if conflict return UNSAT
+ * Before assigning any unit.
+ */
+bool kissat_import_unit_from_painless (kissat *solver) {
+  if (NULL == solver->cbkImportUnit) {
+    LOGP ("The function pointer cbkImportUnit is NULL in solver %d!",
+          solver->id_painless);
+    return true;
+  }
+
+  return solver->cbkImportUnit (solver->painless, solver);
+}
+
+/**
+ * Callback checks before copying internal literals to solver->pclause:
+ *  - if the clause contains an eliminated variable (ignores it)
+ *  - if the clause is already satisfied by root affectation (no need for
+ * it) The callback copies only unassigned literals inside clause.lits
+ */
+bool kissat_import_from_painless (kissat *solver) {
+  if (NULL == solver->cbkImportClause) {
+    LOGP ("The function pointer import_clause_from_painless is NULL in "
+          "solver %d!",
+          solver->id_painless);
+    return true;
+  }
+
+  unsigned size;
+
+  while ((solver->cbkImportClause (solver->painless, solver))) {
+    // Adding the new clause loaded in pclause
+
+    /* If already satisfied or containing eliminated/unknown literals */
+    if (solver->do_not_import) {
+      continue;
+    }
+
+    size = SIZE_STACK (solver->clause);
+
+    assert(size);
+
+#ifndef NDEBUG
+    reference new_clause_ref;
+#endif
+    switch (size) {
+    /* All literals are falsified */
+    case 0:
+      LOGP ("The solver %d received an empty clause. Returns UNSAT!",
+            solver->id_painless);
+      CLEAR_STACK (solver->clause);
+      return false;
+      break;
+      /* Only one unassigned */
+    case 1:
+      LOGP ("The solver %d received a clause with only one unassigned "
+            "internal literal %d.",
+            solver->id_painless, PEEK_STACK (solver->clause, 0));
+      solver->nb_imported_units++;
+      kissat_assign_unit (solver, PEEK_STACK (solver->clause, 0),
+                          "painless reason");
+      break;
+    case 2:
+      /* Inspired by learn_binary */
+      LOGP ("The solver %d received a clause with only two unassigned "
+            "internal literals.",
+            solver->id_painless);
+#ifndef NDEBUG
+      new_clause_ref =
+#endif
+          kissat_new_redundant_clause (solver, 1);
+      assert (new_clause_ref ==
+              INVALID_REF); /*Since binaries are stored directly in watch
+                               lists, i.e no struct clause allocation */
+      solver->nb_imported_bin++;
+      break;
+      /* Else: size > 2*/
+      /* size is used as the glue value */
+    default:
+      /*Inspired by learn_reference*/
+      LOGP ("The solver %d received a clause with %d unassigned internal "
+            "literal.",
+            solver->id_painless, size);
+      assert(solver->pglue);
+#ifndef NDEBUG
+      new_clause_ref =
+#endif
+          kissat_new_redundant_clause (solver, solver->pglue);
+      assert (new_clause_ref != INVALID_REF);
+      solver->nb_imported_cls++;
+    }
+  }
+  CLEAR_STACK (solver->clause);
+  return true;
+}
+// End Painless

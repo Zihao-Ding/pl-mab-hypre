@@ -72,6 +72,7 @@
   OPTION( heuristic, 0, 0, 1, "scoring heuristic (0=VSIDS,1=CHB)") \
   OPTION (ifthenelse, 1, 0, 1, "extract and eliminate if-then-else gates") \
   OPTION (incremental, 0, 0, 1, "enable incremental solving") \
+  OPTION (initshuffle, 0, 0, 1, "(Begin Painless)enable an initial shuffle on variables for phase initialization") \
   OPTION (jumpreasons, 1, 0, 1, "jump binary reasons") \
   LOGOPT (log, 0, 0, 5, "logging level (1=on,2=more,3=check,4/5=mem)") \
   OPTION (lucky, 1, 0, 1, "try some lucky assignments") \

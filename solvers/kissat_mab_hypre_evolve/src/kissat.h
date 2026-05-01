@@ -41,4 +41,63 @@ void kissat_set_decision_limit (kissat *solver, unsigned);
 
 void kissat_print_statistics (kissat *solver);
 
+// Begin Painless
+
+typedef struct
+{
+	unsigned long conflictsPerSec;
+	unsigned long propagationsPerSec;
+	unsigned long restarts;
+	unsigned long decisionsPerConf;
+} KissatMainStatistics;
+
+void
+kissat_get_main_statistics(kissat* solver, KissatMainStatistics*);
+
+// Kissat init
+void
+kissat_set_import_unit_call(kissat*, char (*)(void*, kissat*));
+void
+kissat_set_import_call(kissat*, char (*)(void*, kissat*));
+void
+kissat_set_export_call(kissat*, char (*)(void*, kissat*));
+void
+kissat_set_painless(kissat*, void*);
+void
+kissat_set_id(kissat*, int);
+
+// Interface inner functions
+char
+kissat_set_phase(kissat*, unsigned, int);
+char
+kissat_check_searches(kissat*);
+
+// Sharing
+char
+kissat_import_pclause(kissat*, const int*, unsigned);
+char
+kissat_assign_punits(kissat*, int*, unsigned);
+
+void
+kissat_set_pglue(kissat*, unsigned);
+unsigned
+kissat_get_pglue(kissat*);
+
+unsigned
+kissat_get_var_count(kissat*);
+
+/* Used the kissat struct for the STACK macros to work fine */
+// Interface for solver->pclause
+// void kissat_clear_pclause(kissat *);
+unsigned
+kissat_pclause_size(kissat*);
+// void kissat_push_plit(kissat *, int);
+// int kissat_pop_plit(kissat *);
+int
+kissat_peek_plit(kissat*, unsigned);
+
+void
+kissat_print_sharing_stats(kissat*);
+// End Painless
+
 #endif

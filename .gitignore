@@ -130,3 +130,6 @@ solvers/yalsat/yalsat
 *.la
 config.status
 libtool
+solvers/kissat-inc/makefile
+solvers/lingeling/lglcfg.h
+solvers/lingeling/lglcflags.h

@@ -14,6 +14,7 @@
 #include "solvers/CDCL/Lingeling.hpp"
 #include "solvers/CDCL/MapleCOMSPSSolver.hpp"
 #include "solvers/CDCL/MiniSat.hpp"
+#include "solvers/CDCL/KissatMABHyPreEvolveSolver.hpp"
 #include "solvers/LocalSearch/YalSat.hpp"
 #include "solvers/LocalSearch/TaSSAT.hpp"
 
@@ -142,6 +143,14 @@ SolverFactory::createSolver(char type, char importDBType, std::shared_ptr<Solver
 		case 't':
 			createdSolver = std::make_shared<TaSSAT>(id, __globalParameters__.localSearchFlips, __globalParameters__.maxDivNoise);
 			return SolverAlgorithmType::LOCAL_SEARCH;
+			// break;
+#endif
+
+
+#ifdef KISSAT_MAB_HYPRE_EVOLVE_
+		case 'Z':
+			createdSolver = std::make_shared<KissatMABHyPreEvolveSolver>(id, importDB);
+			return SolverAlgorithmType::CDCL;
 			// break;
 #endif
 

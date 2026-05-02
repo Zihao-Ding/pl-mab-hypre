@@ -136,7 +136,7 @@ release: $(RELEASE_BUILD_DIR)/$(RELEASE_OUTPUT)
 satsuma:
 	@if [ ! -d "$(SATSUMA_BUILD_DIR)/CMakeFiles" ]; then \
 			echo "Configuring Satsuma with CMake..."; \
-			cd $(SATSUMA_BUILD_DIR) && cmake ../../solvers/kissat_mab_hypre_evolve/satsuma; \
+			cd $(SATSUMA_BUILD_DIR) && cmake ../../solvers/kissat_mab_hypre_evolve/Satsuma; \
 	fi
 	@echo "Building Satsuma..."
 	cd $(SATSUMA_BUILD_DIR) && make satsuma

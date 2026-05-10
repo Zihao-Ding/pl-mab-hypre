@@ -17,6 +17,28 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+// Begin Painless
+static inline void kissat_init_shuffle (kissat *solver, int max_var) {
+  // seed is set using seed option of kissat
+  srand (GET_OPTION (seed));
+  int *id;
+  id = (int *) malloc (sizeof (int) * (max_var + 1));
+  for (int i = 1; i <= max_var; i++)
+    id[i] = i;
+  for (int i = 1; i <= max_var; i++) {
+    int j = (rand () % max_var) + 1;
+    int x = id[i];
+    id[i] = id[j];
+    id[j] = x;
+  }
+  for (int i = 1; i <= max_var; i++)
+    kissat_import_literal (solver, i);
+  for (int i = 1; i <= max_var; i++)
+    kissat_activate_literal (solver, kissat_import_literal (solver, id[i]));
+  free (id);
+}
+// End Painless
+
 void kissat_reset_last_learned (kissat *solver) {
   for (really_all_last_learned (p))
     *p = INVALID_REF;
@@ -42,6 +64,9 @@ kissat *kissat_init (void) {
   solver->first_reducible = INVALID_REF;
   solver->last_irredundant = INVALID_REF;
   kissat_reset_last_learned (solver);
+  // Begin Painless
+  INIT_STACK (solver->pclause);
+  // End Painless
   // CHB
   solver->step_dec_chb = 0.000001;
   solver->step_min_chb = 0.06;
@@ -116,6 +141,10 @@ void kissat_release (kissat *solver) {
   RELEASE_STACK (solver->witness);
   RELEASE_STACK (solver->etrail);
 
+  // Begin Painless
+  RELEASE_STACK (solver->pclause);
+  // End Painless
+
   RELEASE_STACK (solver->delayed);
 
   RELEASE_STACK (solver->clause);
@@ -187,6 +216,10 @@ void kissat_reserve (kissat *solver, int max_var) {
   kissat_require (max_var <= EXTERNAL_MAX_VAR,
                   "invalid maximum variable argument '%d'", max_var);
   kissat_increase_size (solver, (unsigned) max_var);
+  // Begin Painless
+  if (GET_OPTION (initshuffle))
+    kissat_init_shuffle (solver, max_var);
+  // End Painless
   if (!GET_OPTION (tumble)) {
     for (int idx = 1; idx <= max_var; idx++)
       (void) kissat_import_literal (solver, idx);

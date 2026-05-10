@@ -115,6 +115,17 @@ ATTRIBUTE_FORMAT (5, 6);
 #define LOGPREFIX "LOG"
 #endif
 
+// Begin Painless
+void
+kissat_log_msg_painless(kissat*, const char* fmt, ...);
+
+#define LOGP(...) \
+	do { \
+		if (solver && GET_OPTION(log)) \
+			kissat_log_msg_painless(solver, __VA_ARGS__); \
+	} while (0)
+// End Painless
+
 #define LOG(...) \
   do { \
     if (solver && GET_OPTION (log)) \
@@ -342,6 +353,12 @@ ATTRIBUTE_FORMAT (5, 6);
   } while (0)
 
 #else
+
+// Begin Painless
+#define LOGP(...) \
+	do { \
+	} while (0)
+// End Painless
 
 #define LOG(...) \
   do { \

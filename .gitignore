@@ -30,6 +30,9 @@ openMPI
 *.proof
 *.local
 
+!solvers/kissat_mab_hypre_evolve_fz/bliss/*.o
+!solvers/kissat_mab_hypre_evolve_fz/bliss/*.a
+
 libs/m4ri-20200125/Makefile
 libs/m4ri-20200125/config.status
 libs/m4ri-20200125/libm4ri.la

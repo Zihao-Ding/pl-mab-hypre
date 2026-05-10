@@ -38,7 +38,7 @@ unsat=no
 passtocompiler=""
 passtolinker=""
 
-goals="libkissat.a kissat"
+goals="libkissat_mab_hypre_evolve_fz.a kissat"
 
 usage () {
 cat <<EOF
@@ -134,7 +134,7 @@ are disabled (with '--no-options', '--extreme' or '--no-options').
    --no-embedded    disable parsing option value pairs in DIMACS file
 
 The default goal of the generated 'makefile' only builds the library
-'libkissat.a' and the stand alone SAT solver 'kissat'.  The test program
+'libkissat_mab_hypre_evolve_fz.a' and the stand alone SAT solver 'kissat'.  The test program
 'tissat' is only compiled on demand (with 'make test'), unless '-g',
 '--coverage' or '--embedded' is specified.  To force compilation of
 'tissat' by default use the following:

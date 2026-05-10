@@ -63,4 +63,4 @@ make format                                 # Format code
 
 - `src/makefile` and root `makefile` are symlinks to `build/makefile`
 - Duplicate configure scripts at `./`, `./src/`, `./test/`
-- Build products: `build/kissat`, `build/tissat`, `build/kitten`, `build/libkissat.a`
+- Build products: `build/kissat`, `build/tissat`, `build/kitten`, `build/libkissat_mab_hypre_evolve_fz.a`

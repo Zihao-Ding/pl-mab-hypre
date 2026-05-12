@@ -1,0 +1,27 @@
+[package]
+name = "veripb-propagator"
+version = "0.1.2"
+authors.workspace = true
+edition.workspace = true
+license.workspace = true
+rust-version.workspace = true
+repository.workspace = true
+readme = "README.md"
+description = "VeriPB library for a pseudo-Boolean propagation engine."
+
+
+[dependencies]
+ahash = "0.8.11"
+colored = "3.0.0"
+malachite-bigint = "0.5.0"
+thiserror = "2.0.12"
+
+[dependencies.veripb-formula]
+version = "0.1.2"
+path = "../veripb-formula"
+
+
+[lib]
+name = "veripb_propagator"
+path = "src/lib.rs"
+crate-type = ["rlib"]

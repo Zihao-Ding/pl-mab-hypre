@@ -1,12 +1,12 @@
-VeriPB/target/
-Satsuma/dejavu/dejavu.o
-Satsuma/dejavu/dejavu
-Satsuma/cvec.o
-Satsuma/hashmap.o
-Satsuma/satsuma.o
-Satsuma/satsuma
+# VeriPB/target/
+# Satsuma/dejavu/dejavu.o
+# Satsuma/dejavu/dejavu
+# Satsuma/cvec.o
+# Satsuma/hashmap.o
+# Satsuma/satsuma.o
+# Satsuma/satsuma
 build/
-veripb
+# veripb
 satsuma
 kissat
-makefile
+# makefile

@@ -31,13 +31,14 @@ echo "n_ls_after_sbva ${n_ls_after_sbva}"
 
 verbosity=1
 
-# nglobalprocs=$(cat $1|wc -l)
-# echo "Running Painless with $n_threads_per_process threads on $(hostname) as leader and with $nglobalprocs MPI processes in total"
+nglobalprocs=$(cat $2|wc -l)
+echo "Running Painless with $n_threads_per_process threads on $(hostname) as leader and with $nglobalprocs MPI processes in total"
 
-nglobalprocs=1
+# nglobalprocs=1
 
 nb_solvers=$(($n_threads_per_process - 1))
 
+# start solving process
 while IFS= read -r line; do
     if [[ $line == p\ * ]]; then
         read -r _ _ N _ <<< "$line"
@@ -57,7 +58,11 @@ if [ "$N" -lt 500000 ]; then
     if [ $SATSUMA_EXIT -eq 0 ]; then
         # parallel setup
         echo "PARALLEL SETUP: "
-        command="./painless_release -v=$verbosity -c=$nb_solvers -solver=Z -t=1000 -shr-strat=1 -shr-sleep=100000 -prs -gshr-strat=-1 $temp_cnf"
+        # command="./painless_release -v=$verbosity -c=$nb_solvers -solver=Z -t=1000 -shr-strat=1 -shr-sleep=100000 -prs -gshr-strat=-1 $temp_cnf"
+        
+        # command="mpirun --mca btl_tcp_if_include eth0 --mca orte_abort_on_non_zero_status false --allow-run-as-root --hostfile $1 --bind-to none ./painless -v=$verbosity -c=$n_threads_per_process -solver=k -t=1000 -sbva-timeout=120 -shr-strat=1 -shr-sleep=100000 -gshr-strat=2 -dist $2"
+
+        command="mpirun --mca btl_tcp_if_include eth0 --mca orte_abort_on_non_zero_status false --allow-run-as-root --hostfile $2 --bind-to none ./painless_release -v=$verbosity -c=$n_threads_per_process -solver=Z -t=1000 -sbva-timeout=120 -shr-strat=1 -shr-sleep=100000 -gshr-strat=2 -dist $temp_cnf"
         echo "EXECUTING: $command"
         eval $command
     else
@@ -71,7 +76,9 @@ if [ "$N" -lt 500000 ]; then
 else
     # parallel setup
     echo "PARALLEL SETUP: "
-    command="./painless_release -v=$verbosity -c=$nb_solvers -solver=Z -t=1000 -shr-strat=1 -shr-sleep=100000 -prs -gshr-strat=-1 $1"
+    # command="./painless_release -v=$verbosity -c=$nb_solvers -solver=Z -t=1000 -shr-strat=1 -shr-sleep=100000 -prs -gshr-strat=-1 $1"
+
+    command="mpirun --mca btl_tcp_if_include eth0 --mca orte_abort_on_non_zero_status false --allow-run-as-root --hostfile $2 --bind-to none ./painless_release -v=$verbosity -c=$n_threads_per_process -solver=Z -t=1000 -sbva-timeout=120 -shr-strat=1 -shr-sleep=100000 -gshr-strat=2 -dist $1"
     echo "EXECUTING: $command"
     eval $command
 fi

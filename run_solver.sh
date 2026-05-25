@@ -45,7 +45,10 @@ while IFS= read -r line; do
         break
     fi
 done < "$1"
-temp_cnf="$1.temp.cnf"
+
+BASENAME=$(basename "$1")
+temp_cnf="/shared/${BASENAME}.temp.cnf"
+
 echo "temporary file name: $temp_cnf"
 
 if [ "$N" -lt 500000 ]; then
@@ -56,6 +59,7 @@ if [ "$N" -lt 500000 ]; then
     eval $command
     SATSUMA_EXIT=$?
     if [ $SATSUMA_EXIT -eq 0 ]; then
+        chmod 644 "$temp_cnf"
         # parallel setup
         echo "PARALLEL SETUP: "
         # command="./painless_release -v=$verbosity -c=$nb_solvers -solver=Z -t=1000 -shr-strat=1 -shr-sleep=100000 -prs -gshr-strat=-1 $temp_cnf"
